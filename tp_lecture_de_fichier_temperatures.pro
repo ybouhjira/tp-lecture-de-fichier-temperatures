@@ -6,5 +6,6 @@ CONFIG -= qt
 SOURCES += main.c
 
 HEADERS += \
-    lecture.h
+    lecture.h \
+    requete.h
 
