@@ -219,7 +219,7 @@ Fonction chaine_a_fonction(char chaine[100], int *ok)
 
 ListeConditions* lire_conditions(int *ok)
 {
-  printf("CONDITIONS : \n");
+  printf("CONDITIONS : \n    ");
   char mot[100];
 
   char c = 'a';
@@ -239,12 +239,12 @@ ListeConditions* lire_conditions(int *ok)
           pos = 0;
 
           // Ajout a la condition courante
-          if(posCondition == 0)
+          if(posCondition == 0) // colonne
             {
               courant.col = chaine_a_colonne(mot, ok);
               posCondition++;
             }
-          else if(posCondition == 1)
+          else if(posCondition == 1) // fonction
             {
               courant.f = chaine_a_fonction(mot, ok);
               posCondition++;
@@ -252,11 +252,19 @@ ListeConditions* lire_conditions(int *ok)
           else
             {
               // fin de la condition
-              if(strcmp(mot, "et") == 0)
+              if(strcmp(mot, "et") == 0 || c == '\n')
                 {
+                  liste_chaines_ajout_fin(&courant.params, mot);
                   liste_conditions_ajout_fin(&conditions, courant);
                   courant.params = NULL; // nouvelle condition
                   posCondition = 0;
+
+                  if(c == '\n') // Ou
+                    {
+                      printf("ou ");
+                      Condition separateur = {OU, EGALE, NULL};
+                      liste_conditions_ajout_fin(&conditions, separateur);
+                    }
                 }
               else if(c == ';')
                 {
@@ -274,11 +282,11 @@ ListeConditions* lire_conditions(int *ok)
 void interrogation()
 {
   int ok = 1;
-  ListeChaines *colonnes = lire_colonnes();
+    ListeChaines *colonnes = lire_colonnes();
   ListeConditions* conditions =  lire_conditions(&ok);
 
   if(!ok) // erreur
-    printf("Requete invalide");
+    printf("Requete invalide.\n");
   else // traitement de la requete
     {
       ListeConditions *courant = conditions;
