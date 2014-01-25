@@ -44,6 +44,72 @@ typedef struct ListeConditions
   struct ListeConditions* suiv;
 } ListeConditions;
 
+float moy_jour(Jour ans[ANS][12][31], int an, int mois, int jour)
+{
+  Jour j = ans[an - AN_DEBUT][mois - 1][jour - 1];
+  return ((float) (j.min + j.max)) / 2;
+}
+
+float moy_mois(Jour ans[ANS][12][31], int an, int mois)
+{
+  float moy = 0;
+  int j, longueur = longueur_mois(an, mois);
+  for(j = 0; j <= longueur; ++j) moy += moy_jour(ans, an, mois, j);
+  return moy / longueur;
+}
+
+int max_mois(Jour ans[ANS][12][31], int an, int mois)
+{
+  int max = ans[an - AN_DEBUT][mois - 1][0].max, j;
+  for(j = 2; j < longueur_mois(an, mois); ++j)
+    {
+      int maxJour = ans[an - AN_DEBUT][mois - 1][j - 1].max;
+      if(max < maxJour) max = maxJour;
+    }
+  return max;
+}
+
+int min_mois(Jour ans[ANS][12][31], int an, int mois)
+{
+  int min = ans[an - AN_DEBUT][mois - 1][0].min, j;
+  for(j = 2; j < longueur_mois(an, mois); ++j)
+    {
+      int minJour = ans[an - AN_DEBUT][mois - 1][j - 1].min;
+      if(min > minJour) min = minJour;
+    }
+  return min;
+}
+
+float moy_an(Jour ans[ANS][12][31], int an)
+{
+  float moy = 0;
+  int m;
+  for(m = 1; m <= 12; ++m) moy += moy_mois(ans, an, m);
+  return moy / 12;
+}
+
+int min_an(Jour ans[ANS][12][31], int an)
+{
+  int min = min_mois(ans, an, 1), m;
+  for(m = 2; m <= 12; ++m)
+    {
+      int minMois = min_mois(ans, an, m);
+      if(min > minMois) min = minMois;
+    }
+  return min;
+}
+
+int max_an(Jour ans[ANS][12][31], int an)
+{
+  int max = max_mois(ans, an, 1), m;
+  for(m = 2; m <= 12; ++m)
+    {
+      int maxMois = max_mois(ans, an, m);
+      if(max < maxMois) max = maxMois;
+    }
+  return max;
+}
+
 
 /** Entrées :
   *    ans : Les données lu du fichier
@@ -56,78 +122,69 @@ typedef struct ListeConditions
   * eux la fonction parcourir si cette dérnière retourne 1 la
   * date est affiché
   */
-//void parcourir(Jour ans[ANS][12][31],
-//int (*test)(Jour[ANS][12][31], int, int, int),
-//Liste *cols)
-//{
-//  int an, mois, jour;
-//  for(an = AN_DEBUT; an <= AN_FIN; an++)
-//    {
-//      if(test(ans, an, mois, jour))
-//        {
-//          // Parcourir la listes des colonnes
-//          Liste *courant = *cols;
+void parcourir(Jour ans[ANS][12][31],
+int (*test)(Jour[ANS][12][31], int, int, int),
+ListeChaines *cols)
+{
+  int an, mois, jour;
+  ListeChaines *courant = cols;
 
-//          // Afficher les colonnes séléctionnée par l'utilisateur
-//          while(courant)
-//            {
-//              // année
-//              if(!strcmp(courant->val, "année"))
-//                printf("%d ", an);
+  for(an = AN_DEBUT; an <= AN_FIN; an++)
+    for(mois = 1; mois <= 12; ++mois)
+      for(jour = 1; jour < longueur_mois(an, mois); ++jour)
+        if(test(ans, an, mois, jour))
+          // Afficher les colonnes séléctionnée par l'utilisateur
+          while(courant)
+            {
+              // année
+              if(!strcmp(courant->val, "année"))
+                printf("%d ", an);
 
-//              // mois
-//              if(!strcmp(courant->val, "mois"))
-//                printf("%d ", mois);
+              // mois
+              if(!strcmp(courant->val, "mois"))
+                printf("%d ", mois);
 
-//              // jour
-//              if(!strcmp(courant->val, "jour"))
-//                printf("%d ", jour);
+              // jour
+              if(!strcmp(courant->val, "jour"))
+                printf("%d ", jour);
 
-//              // min
-//              if(!strcmp(courant->val, "min"))
-//                printtf("%d ", ans[an][mois][jour].min);
+              // min
+              if(!strcmp(courant->val, "min"))
+                printf("%d ", ans[an][mois][jour].min);
 
-//              // max
-//              if(!strcmp(courant->val, "max"))
-//                printf("%d ", ans[an][mois][jour].max);
+              // max
+              if(!strcmp(courant->val, "max"))
+                printf("%d ", ans[an][mois][jour].max);
 
-//              // moy(jour)
-//              if(!strcmp(courant->val, "moy(jour)"))
-//                printf("%f ", moyenne_jour());
-//              // TODO: écrire la fonction moyenne_jour
+              // moy(jour)
+              if(!strcmp(courant->val, "moy(jour)"))
+                printf("%f ", moy_jour(ans, an, mois, jour));
 
-//              // moy(mois)
-//              if(!strcmp(courant->val, "moy(mois)"))
-//                pritnf("%d ", moyenne_mois());
-//              // TODO : écrire la fonction moyenne_mois
+              // moy(mois)
+              if(!strcmp(courant->val, "moy(mois)"))
+                printf("%f ", moy_mois(ans, an, mois));
 
-//              // max(mois)
-//              if(!strcmp(courant->val, "max(mois)"))
-//                printf("%d ", max_mois());
-//              // TODO :écrire max_mois()
+              // max(mois)
+              if(!strcmp(courant->val, "max(mois)"))
+                printf("%d ", max_mois(ans, an, mois));
 
-//              // min(mois)
-//              if(!strcmp(courant->val, "min(mois)"))
-//                printf("%d ", min_mois());
-//              // TODO : écrire min_mois()
+              // min(mois)
+              if(!strcmp(courant->val, "min(mois)"))
+                printf("%d ", min_mois(ans, an, mois));
 
-//              // moy(an)
-//              if(!strcmp(courant->val, "moy(an)"))
-//                printf("%f ", moyenne_an());
-//              // TODO : écrire moyenne_an()
+              // moy(an)
+              if(!strcmp(courant->val, "moy(an)"))
+                printf("%f ", moy_an(ans, an));
 
-//              // max(an)
-//              if(!strcmp(courant->val, "max(an)"))
-//                printf("%d ", max_an());
+              // max(an)
+              if(!strcmp(courant->val, "max(an)"))
+                printf("%d ", max_an(ans, an));
 
-//              // min(an)
-//              if(!strcmp(courant->val, "min(an)"))
-//                printf("%d ", min_an());
-//              // TODO : écrire min_an()
-//            }
-//        }
-//    }
-//}
+              // min(an)
+              if(!strcmp(courant->val, "min(an)"))
+                printf("%d ", min_an(ans, an));
+            }
+}
 
 void liste_chaines_ajout_fin(ListeChaines **liste, char *str)
 {
@@ -212,7 +269,7 @@ Fonction chaine_a_fonction(char chaine[100], int *ok)
   if(!strcmp(chaine, "<")) return INF;
   if(!strcmp(chaine, ">")) return SUP;
 
-   // La chaine entrée est invalide
+  // La chaine entrée est invalide
   *ok = 0;
   return 0;
 }
@@ -272,7 +329,7 @@ ListeConditions* lire_conditions(int *ok)
                 }
               // Lecture des paramètres
               else
-                  liste_chaines_ajout_fin(&courant.params, mot);
+                liste_chaines_ajout_fin(&courant.params, mot);
             }
         }
     }
@@ -282,7 +339,7 @@ ListeConditions* lire_conditions(int *ok)
 void interrogation()
 {
   int ok = 1;
-    ListeChaines *colonnes = lire_colonnes();
+  ListeChaines *colonnes = lire_colonnes();
   ListeConditions* conditions =  lire_conditions(&ok);
 
   if(!ok) // erreur
@@ -292,16 +349,16 @@ void interrogation()
       ListeConditions *courant = conditions;
       while(courant)
         {
-         printf("%d, %d, ",  courant->val.col, courant->val.f);
+          printf("%d, %d, ",  courant->val.col, courant->val.f);
 
-         ListeChaines *str = courant->val.params;
-         while(str)
-           {
-             printf("%s, ", str->val);
-             str = str->suiv;
-           }
-         printf("\n");
-         courant = courant->suiv;
+          ListeChaines *str = courant->val.params;
+          while(str)
+            {
+              printf("%s, ", str->val);
+              str = str->suiv;
+            }
+          printf("\n");
+          courant = courant->suiv;
         }
     }
 }
