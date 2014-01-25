@@ -101,13 +101,45 @@ void liste_ajout_fin(Liste **liste, char *str)
   Liste *nouv = calloc(1, sizeof(Liste));
   strcpy(nouv->val, str);
   if(!(*liste)) *liste = nouv;
-     else
+  else
     {
       Liste *courant = *liste;
       while(courant->suiv) courant = courant->suiv;
       courant->suiv = nouv;
     }
 }
+
+typedef enum
+{
+  AN,
+  MOIS,
+  JOUR,
+  MIN,
+  MAX,
+  MOY_JOUR,
+  MOY_MOIS,
+  MOY_AN,
+  MIN_MOIS,
+  MIN_AN,
+  MAX_MOIS,
+  MAX_AN
+} Colonne;
+
+typedef enum
+{
+  JOUR_EST,
+  JOUR_EGALE,
+  JOUR_ENTRE,
+  AN_EGALE,
+  MOIS_EGALE
+} Fonction;
+
+typedef struct
+{
+  Colonne col;
+  Fonction f;
+  Liste *params;
+} Condition;
 
 void interrogation()
 {
@@ -129,6 +161,8 @@ void interrogation()
           liste_ajout_fin(&listeColonnes, colonne);
         }
     }
+
+  // Conditions
 
 
 }
