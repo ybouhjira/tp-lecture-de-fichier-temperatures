@@ -1,6 +1,7 @@
 #ifndef REQUETE_H
 #define REQUETE_H
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "lecture.h"
@@ -114,18 +115,17 @@ int mois, int jour, int *ok)
 {
   switch (cond.col)
     {
-      // FLOAT
+    // FLOAT
     case MOY_AN:
     case MOY_JOUR:
     case MOY_MOIS:
       {
         float valeur = colonne_a_float(cond.col, ans, an, mois, jour);
-        char *p = cond.params->val; // paramètre
         switch (cond.f)
           {
-          case EGALE: return valeur == atof(p);
-          case INF: return valeur < atof(p);
-          case SUP: return valeur > atof(p);
+          case EGALE: return valeur == cond.param.val.f;
+          case INF: return valeur < cond.param.val.f;
+          case SUP: return valeur > cond.param.val.f;
           default: // erreur
             *ok = 0;
             return 0;
@@ -136,13 +136,13 @@ int mois, int jour, int *ok)
     default:
       {
         int valeur = colonne_a_int(cond.col, ans, an, mois, jour);
-        char *p = cond.params->val; // paramètre
         switch (cond.f)
           {
-          case EGALE: return valeur == atof(p);
-          case INF: return valeur < atof(p);
-          case SUP: return valeur < atof(p);
-          case JOUR_EST: return strcmp(nom_jour(an, mois, valeur), p);
+          case EGALE: return valeur == cond.param.val.i;
+          case INF: return valeur < cond.param.val.i;
+          case SUP: return valeur < cond.param.val.i;
+          case JOUR_EST:
+            return strcmp(nom_jour(an, mois, valeur), cond.param.val.jour);
           default:
             *ok = 0;
             return 0;
@@ -161,8 +161,8 @@ ListeConditions* conditions, int *ok)
     {
       switch (lst->val.col) {
         case OU:
-            if(res) return 1;
-            else res = 1;
+          if(res) return 1;
+          else res = 1;
           break;
         default:
           res = res && tester_condition(lst->val, ans, an, mois, jour, ok);
@@ -176,42 +176,62 @@ void parcourir(Jour ans[ANS][12][31], ListeConditions *conditions,
 ListeChaines *cols, int *ok)
 {
   int an, mois, jour;
-  ListeChaines *courant = cols;
 
   for(an = ANDB; an <= ANFN; an++) // an
-    for(mois = 1; mois <= 12; ++mois) // mois
-      for(jour = 1; jour < longueur_mois(an, mois); ++jour) // jour
-        if(test_jour(ans, an, mois, jour, conditions, ok)) // tester
-          while(courant)
+    {
+      for(mois = 1; mois <= 12; ++mois) // mois
+        {
+          for(jour = 1; jour < longueur_mois(an, mois); ++jour) // jour
             {
-              // Afficher les colonnes séléctionnée par l'utilisateur
-              if(!strcmp(courant->val, "année"))
-                printf("%d ", an);
-              else if(!strcmp(courant->val, "mois"))
-                printf("%d ", mois);
-              else if(!strcmp(courant->val, "jour"))
-                printf("%d ", jour);
-              else if(!strcmp(courant->val, "min"))
-                printf("%d ", ans[an][mois][jour].min);
-              else if(!strcmp(courant->val, "max"))
-                printf("%d ", ans[an][mois][jour].max);
-              else if(!strcmp(courant->val, "moy(jour)"))
-                printf("%f ", moy_jour(ans, an, mois, jour));
-              else if(!strcmp(courant->val, "moy(mois)"))
-                printf("%f ", moy_mois(ans, an, mois));
-              else if(!strcmp(courant->val, "max(mois)"))
-                printf("%d ", max_mois(ans, an, mois));
-              else if(!strcmp(courant->val, "min(mois)"))
-                printf("%d ", min_mois(ans, an, mois));
-              else if(!strcmp(courant->val, "moy(an)"))
-                printf("%f ", moy_an(ans, an));
-              else if(!strcmp(courant->val, "max(an)"))
-                printf("%d ", max_an(ans, an));
-              else if(!strcmp(courant->val, "min(an)"))
-                printf("%d ", min_an(ans, an));
-              else
-                *ok = 0;
+              if(test_jour(ans, an, mois, jour, conditions, ok)) // tester
+                {
+                  ListeChaines *colonneCourante = cols;
+                  // parcourir les colonnes et écrire ceux séléctionnées
+                  while(colonneCourante)
+                    {
+                      if(!strcmp(colonneCourante->val, "an"))
+                        printf("%d ", an);
+
+                      if(!strcmp(colonneCourante->val, "mois"))
+                        printf("%d ", mois);
+
+                      if(!strcmp(colonneCourante->val, "jour"))
+                        printf("%d ", jour);
+
+                      if(!strcmp(colonneCourante->val, "min"))
+                        printf("%d ", ans[an][mois][jour].min);
+
+                      if(!strcmp(colonneCourante->val, "max"))
+                        printf("%d ", ans[an][mois][jour].max);
+
+                      if(!strcmp(colonneCourante->val, "moy(jour)"))
+                        printf("%f ", moy_jour(ans, an, mois, jour));
+
+                      if(!strcmp(colonneCourante->val, "moy(mois)"))
+                        printf("%f ", moy_mois(ans, an, mois));
+
+                      if(!strcmp(colonneCourante->val, "max(mois)"))
+                        printf("%d ", max_mois(ans, an, mois));
+
+                      if(!strcmp(colonneCourante->val, "min(mois)"))
+                        printf("%d ", min_mois(ans, an, mois));
+
+                      if(!strcmp(colonneCourante->val, "moy(an)"))
+                        printf("%f ", moy_an(ans, an));
+
+                      if(!strcmp(colonneCourante->val, "max(an)"))
+                        printf("%d ", max_an(ans, an));
+
+                      if(!strcmp(colonneCourante->val, "min(an)"))
+                        printf("%d ", min_an(ans, an));
+
+                      colonneCourante = colonneCourante->suiv;
+                    }
+                  printf("\n");
+                }
             }
+        }
+    }
 }
 
 void liste_chaines_ajout_fin(ListeChaines **liste, char *str)
@@ -245,7 +265,7 @@ ListeChaines* lire_colonnes()
   while(getchar() != '\n');
 
   // Colonnes
-  printf("colonnes : ");
+  printf("COLONNES : \n    ");
   char colonne[100];
 
   ListeChaines *listeColonnes = NULL;
@@ -288,7 +308,7 @@ Colonne chaine_a_colonne(char chaine[100], int *ok)
   return 0;
 }
 
-Fonction chaine_a_fonction(char chaine[100], int *ok)
+Fonction chaine_a_fonction(char chaine[4], int *ok)
 {
   if(!strcmp(chaine, "est")) return JOUR_EST;
   if(!strcmp(chaine, "=")) return EGALE;
@@ -300,10 +320,43 @@ Fonction chaine_a_fonction(char chaine[100], int *ok)
   return 0;
 }
 
+void chaine_a_param(char chaine[9], Condition *cond)
+{
+  switch (cond->col)
+    {
+    // jour -> STR pour est , et INT pour EGALE
+    case JOUR:
+      switch (cond->f)
+        {
+        case JOUR_EST:
+          strcpy(cond->param.val.jour, chaine);
+          cond->param.type = STR;
+          break;
+        default :
+          cond->param.type = INT;
+          cond->param.val.i = atoi(chaine);
+        }
+      break;
+
+      // FLOAT
+    case MOY_AN:
+    case MOY_JOUR:
+    case MOY_MOIS:
+      cond->param.val.f = atof(chaine);
+      cond->param.type = FLOAT;
+      break;
+
+      // INT
+    default:
+      cond->param.type = INT;
+      cond->param.val.i = atoi(chaine);
+    }
+}
+
 ListeConditions* lire_conditions(int *ok)
 {
   printf("CONDITIONS : \n    ");
-  char mot[100];
+  char mot[10];
 
   char c = 'a';
   int pos = 0;
@@ -338,16 +391,17 @@ ListeConditions* lire_conditions(int *ok)
               // fin de la condition
               if(strcmp(mot, "et") == 0 || c == '\n')
                 {
-                  printf("ajout param : '%s'\n", mot);
-                  liste_chaines_ajout_fin(&courant.params, mot);
+                  if(c == '\n')
+                    chaine_a_param(mot, &courant);
+
                   liste_conditions_ajout_fin(&conditions, courant);
-                  courant.params = NULL; // nouvelle condition
-                  posCondition = 0;
+                  posCondition = 0; // nouvelle condition
 
                   if(c == '\n') // Ou
                     {
                       printf("ou ");
-                      Condition separateur = {OU, EGALE, NULL};
+                      Condition separateur;
+                      separateur.col = OU;
                       liste_conditions_ajout_fin(&conditions, separateur);
                     }
                 }
@@ -357,10 +411,7 @@ ListeConditions* lire_conditions(int *ok)
                 }
               // Lecture des paramètres
               else
-                {
-                  printf("ajout param : %s\n", mot);
-                liste_chaines_ajout_fin(&courant.params, mot);
-                }
+                chaine_a_param(mot, &courant);
             }
         }
     }

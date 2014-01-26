@@ -27,12 +27,28 @@ typedef enum
 
 typedef enum {JOUR_EST, EGALE, INF, SUP} Fonction;
 
+
+typedef union
+{
+  char jour[9];
+  float f;
+  int i;
+} UParam;
+
+typedef enum {STR, INT, FLOAT} TypeParam;
+
+typedef struct
+{
+  UParam val;
+  TypeParam type;
+} Param;
+
 /** structure condition */
 typedef struct
 {
   Colonne col; // Colonne sur laquelle appliquer la condition
   Fonction f; // la fonction applique
-  ListeChaines *params; // les paramètres de la fonction
+  Param param; // les paramètres de la fonction
 } Condition;
 
 /** Liste chainée de conditions */
