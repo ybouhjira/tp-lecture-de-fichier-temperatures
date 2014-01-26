@@ -1,3 +1,7 @@
+/**
+  * fichier : date.h
+  * Contient les fonctions relatives aux dates
+  */
 #ifndef DATE_H
 #define DATE_H
 
@@ -9,13 +13,20 @@
   *   an : L'année
   *   mois : Le mois
   * Sorties :
-  *   longeur : Le nombre de jour dans le mois
+  *   Le nombre de jour dans le mois
   */
 int longueur_mois(int an, int mois)
 {
   assert(1 <= mois && mois <= 12);
   return mois == 2 ? an % 4? 28 : 29 : 30 + (((mois * 9) / 8) & 1);
 }
+
+/** Entrées :
+  *    mois : Un mois de l'année
+  *    an : Une année
+  * Sorties :
+  *   Le nombre de jour de janvier au mois "mois".
+  */
 int jours_mois(short int mois, int an)
 {
   int nombreJours = 0, m;
@@ -23,6 +34,13 @@ int jours_mois(short int mois, int an)
   return nombreJours;
 }
 
+/** Entrées :
+  *   an : L'année
+  *   mois : Le mois
+  *   jour: Le jour
+  * Sorties :
+  *   Le nom de la semaine correspondant à la datte donnée.
+  */
 char* nom_jour(int an, int mois, int jour)
 {
   int jours_an = (an - ANDB) * 365 + (an - ANDB) / 4;
@@ -39,6 +57,5 @@ char* nom_jour(int an, int mois, int jour)
     default: return "lundi";
     }
 }
-
 
 #endif // DATE_H
