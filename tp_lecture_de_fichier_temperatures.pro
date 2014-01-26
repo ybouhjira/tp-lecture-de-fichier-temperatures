@@ -8,5 +8,6 @@ SOURCES += main.c
 HEADERS += \
     lecture.h \
     requete.h \
-    date.h
+    date.h \
+    structs.h
 
