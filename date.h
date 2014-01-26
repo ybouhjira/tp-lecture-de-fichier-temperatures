@@ -30,13 +30,13 @@ char* nom_jour(int an, int mois, int jour)
 
   switch(indice)
     {
-    case 0: return "Mardi";
-    case 1: return "Mercredi";
-    case 2: return "Jeudi";
-    case 3: return "Vendredi";
-    case 4: return "Samedi";
-    case 5: return "Dimanche";
-    default: return "Lundi";
+    case 0: return "mardi";
+    case 1: return "mercredi";
+    case 2: return "jeudi";
+    case 3: return "vendredi";
+    case 4: return "samedi";
+    case 5: return "dimanche";
+    default: return "lundi";
     }
 }
 

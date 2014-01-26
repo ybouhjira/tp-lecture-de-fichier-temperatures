@@ -120,12 +120,12 @@ int mois, int jour, int *ok)
     case MOY_JOUR:
     case MOY_MOIS:
       {
-        float valeur = colonne_a_float(cond.col, ans, an, mois, jour);
+        float val = colonne_a_float(cond.col, ans, an, mois, jour);
         switch (cond.f)
           {
-          case EGALE: return valeur == cond.param.val.f;
-          case INF: return valeur < cond.param.val.f;
-          case SUP: return valeur > cond.param.val.f;
+          case EGALE: return val == cond.param.val.f;
+          case INF: return val < cond.param.val.f;
+          case SUP: return val > cond.param.val.f;
           default: // erreur
             *ok = 0;
             return 0;
@@ -135,14 +135,14 @@ int mois, int jour, int *ok)
       // INT
     default:
       {
-        int valeur = colonne_a_int(cond.col, ans, an, mois, jour);
+        int val = colonne_a_int(cond.col, ans, an, mois, jour);
         switch (cond.f)
           {
-          case EGALE: return valeur == cond.param.val.i;
-          case INF: return valeur < cond.param.val.i;
-          case SUP: return valeur < cond.param.val.i;
+          case EGALE: return val == cond.param.val.i;
+          case INF: return val < cond.param.val.i;
+          case SUP: return val < cond.param.val.i;
           case JOUR_EST:
-            return strcmp(nom_jour(an, mois, valeur), cond.param.val.jour);
+            return !strcmp(nom_jour(an, mois, val), cond.param.val.jour);
           default:
             *ok = 0;
             return 0;
@@ -199,10 +199,12 @@ ListeChaines *cols, int *ok)
                         printf("%d ", jour);
 
                       if(!strcmp(colonneCourante->val, "min"))
-                        printf("%d ", ans[an][mois][jour].min);
+                        printf("%d ",
+                               ans[an - ANDB][mois - 1][jour - 1].min);
 
                       if(!strcmp(colonneCourante->val, "max"))
-                        printf("%d ", ans[an][mois][jour].max);
+                        printf("%d ",
+                               ans[an - ANDB][mois - 1][jour - 1].max);
 
                       if(!strcmp(colonneCourante->val, "moy(jour)"))
                         printf("%f ", moy_jour(ans, an, mois, jour));
