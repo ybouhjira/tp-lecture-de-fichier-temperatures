@@ -95,7 +95,7 @@ int mois, int jour)
     }
 }
 
-float colonne_a_float(Colonne col, Jour ans[ANS][12][13], int an,
+float colonne_a_float(Colonne col, Jour ans[ANS][12][31], int an,
 int mois, int jour)
 {
   switch (col)
@@ -103,49 +103,73 @@ int mois, int jour)
     case MOY_JOUR: return moy_jour(ans, an, mois, jour);
     case MOY_MOIS: return moy_mois(ans, an, mois);
     case MOY_AN: return moy_an(ans, an);
+    default: // erreur
+      assert(0);
+      return 0;
+    }
+}
+
+int tester_condition(Condition cond, Jour ans[ANS][12][31], int an,
+int mois, int jour, int *ok)
+{
+  switch (cond.col)
+    {
+      // FLOAT
+    case MOY_AN:
+    case MOY_JOUR:
+    case MOY_MOIS:
+      {
+        float valeur = colonne_a_float(cond.col, ans, an, mois, jour);
+        char *p = cond.params->val; // paramètre
+        switch (cond.f)
+          {
+          case EGALE: return valeur == atof(p);
+          case INF: return valeur < atof(p);
+          case SUP: return valeur > atof(p);
+          default: // erreur
+            *ok = 0;
+            return 0;
+          }
+        break;
+      }
+      // INT
+    default:
+      {
+        int valeur = colonne_a_int(cond.col, ans, an, mois, jour);
+        char *p = cond.params->val; // paramètre
+        switch (cond.f)
+          {
+          case EGALE: return valeur == atof(p);
+          case INF: return valeur < atof(p);
+          case SUP: return valeur < atof(p);
+          case JOUR_EST: return strcmp(nom_jour(an, mois, valeur), p);
+          default:
+            *ok = 0;
+            return 0;
+          }
+      }
     }
 }
 
 int test_jour(Jour ans[ANS][12][31], int an, int mois, int jour,
 ListeConditions* conditions, int *ok)
 {
-  ListeConditions *courant ;
+  ListeConditions *lst ; // itérateur pour la liste
+  int res = 1; // resultat
 
-  for(courant = conditions; courant; courant = courant->suiv)
+  for(lst = conditions; lst; lst = lst->suiv)
     {
-      // tester la condition courante
-      Condition cond = courant->val;
-
-      switch (cond.col)
-        {
-        case MOY_AN:
-        case MOY_JOUR:
-        case MOY_MOIS: // float
-          {
-            float valeur = colonne_a_float(cond.col, ans, an, mois, jour);
-            switch (cond.f)
-              {
-              case EGALE: return valeur == atof(cond.params->val);
-              case INF: return valeur < atof(cond.params->val);
-              case SUP: return valeur > atof(cond.params->val);
-              default: *ok = 0;
-              }
-            break;
-          }
-        default: // int
-          {
-            int valeur = colonne_a_int(cond.col, ans, an, mois, jour);
-            switch (cond.f)
-              {
-              case EGALE: return valeur == atof(cond.params->val);
-              case INF: return valeur < atof(cond.params->val);
-              case SUP: return valeur < atof(cond.params->val);
-              case JOUR_EST: return
-              default: *ok = 0;
-              }
-          }
+      switch (lst->val.col) {
+        case OU:
+            if(res) return 1;
+            else res = 1;
+          break;
+        default:
+          res = res && tester_condition(lst->val, ans, an, mois, jour, ok);
+          if(!(*ok)) return 0;
         }
     }
+  return res;
 }
 
 void parcourir(Jour ans[ANS][12][31], ListeConditions *conditions,
@@ -218,6 +242,8 @@ void liste_conditions_ajout_fin(ListeConditions **liste, Condition cond)
 
 ListeChaines* lire_colonnes()
 {
+  while(getchar() != '\n');
+
   // Colonnes
   printf("colonnes : ");
   char colonne[100];
@@ -281,9 +307,10 @@ ListeConditions* lire_conditions(int *ok)
 
   char c = 'a';
   int pos = 0;
-  Condition courant ; // Condition courante;
+  Condition courant = {0} ; // Condition courante;
   ListeConditions* conditions = NULL;
   int posCondition = 0; // position dans la structure condition
+
   while(c != ';')
     {
       c = getchar();
@@ -311,6 +338,7 @@ ListeConditions* lire_conditions(int *ok)
               // fin de la condition
               if(strcmp(mot, "et") == 0 || c == '\n')
                 {
+                  printf("ajout param : '%s'\n", mot);
                   liste_chaines_ajout_fin(&courant.params, mot);
                   liste_conditions_ajout_fin(&conditions, courant);
                   courant.params = NULL; // nouvelle condition
@@ -329,7 +357,10 @@ ListeConditions* lire_conditions(int *ok)
                 }
               // Lecture des paramètres
               else
+                {
+                  printf("ajout param : %s\n", mot);
                 liste_chaines_ajout_fin(&courant.params, mot);
+                }
             }
         }
     }
