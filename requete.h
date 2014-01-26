@@ -110,10 +110,46 @@ int max_an(Jour ans[ANS][12][31], int an)
   return max;
 }
 
+float colonne_a_valeur(Colonne col, Jour ans[ANS][12][31], int an,
+int mois, int jour)
+{
+  switch (col) {
+    case JOUR: return jour;
+    case AN: return an;
+    case MOIS: return mois;
+
+    case MIN: return ans[an - AN_DEBUT][mois - 1][jour - 1].min;
+    case MAX : return ans[an - AN_DEBUT][mois - 1][jour - 1].max;
+
+    case MOY_JOUR: return moy_jour(ans, an, mois, jour);
+    case MOY_MOIS: return moy_mois(ans, an, mois);
+    case MOY_AN: return moy_an(ans, an);
+
+    case MIN_MOIS: return min_mois(ans, an, mois);
+    case MIN_AN: return min_an(ans, an);
+
+    case MAX_MOIS: return max_mois(ans, an, mois);
+    case MAX_AN: return max_an(ans, an);
+
+    default: assert(0); return 0;
+    }
+}
+
 int test_jour(Jour ans[ANS][12][31], int an, int mois, int jour,
 ListeConditions* conditions)
 {
-  // TODO : Code de test ici :p
+  ListeConditions *courant ;
+
+  for(courant = conditions; courant; courant = courant->suiv)
+    {
+      // tester la condition courante
+      Condition cond = courant->val;
+
+//      switch (cond.f)
+//        {
+
+//        }
+    }
 
 }
 
