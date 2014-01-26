@@ -46,7 +46,7 @@ typedef struct ListeConditions
 
 float moy_jour(Jour ans[ANS][12][31], int an, int mois, int jour)
 {
-  Jour j = ans[an - AN_DEBUT][mois - 1][jour - 1];
+  Jour j = ans[an - ANDB][mois - 1][jour - 1];
   return ((float) (j.min + j.max)) / 2;
 }
 
@@ -60,10 +60,10 @@ float moy_mois(Jour ans[ANS][12][31], int an, int mois)
 
 int max_mois(Jour ans[ANS][12][31], int an, int mois)
 {
-  int max = ans[an - AN_DEBUT][mois - 1][0].max, j;
+  int max = ans[an - ANDB][mois - 1][0].max, j;
   for(j = 2; j < longueur_mois(an, mois); ++j)
     {
-      int maxJour = ans[an - AN_DEBUT][mois - 1][j - 1].max;
+      int maxJour = ans[an - ANDB][mois - 1][j - 1].max;
       if(max < maxJour) max = maxJour;
     }
   return max;
@@ -71,10 +71,10 @@ int max_mois(Jour ans[ANS][12][31], int an, int mois)
 
 int min_mois(Jour ans[ANS][12][31], int an, int mois)
 {
-  int min = ans[an - AN_DEBUT][mois - 1][0].min, j;
+  int min = ans[an - ANDB][mois - 1][0].min, j;
   for(j = 2; j < longueur_mois(an, mois); ++j)
     {
-      int minJour = ans[an - AN_DEBUT][mois - 1][j - 1].min;
+      int minJour = ans[an - ANDB][mois - 1][j - 1].min;
       if(min > minJour) min = minJour;
     }
   return min;
@@ -110,7 +110,7 @@ int max_an(Jour ans[ANS][12][31], int an)
   return max;
 }
 
-float colonne_a_valeur(Colonne col, Jour ans[ANS][12][31], int an,
+int colonne_a_int(Colonne col, Jour ans[ANS][12][31], int an,
 int mois, int jour)
 {
   switch (col) {
@@ -118,12 +118,8 @@ int mois, int jour)
     case AN: return an;
     case MOIS: return mois;
 
-    case MIN: return ans[an - AN_DEBUT][mois - 1][jour - 1].min;
-    case MAX : return ans[an - AN_DEBUT][mois - 1][jour - 1].max;
-
-    case MOY_JOUR: return moy_jour(ans, an, mois, jour);
-    case MOY_MOIS: return moy_mois(ans, an, mois);
-    case MOY_AN: return moy_an(ans, an);
+    case MIN: return ans[an - ANDB][mois - 1][jour - 1].min;
+    case MAX : return ans[an - ANDB][mois - 1][jour - 1].max;
 
     case MIN_MOIS: return min_mois(ans, an, mois);
     case MIN_AN: return min_an(ans, an);
@@ -135,8 +131,19 @@ int mois, int jour)
     }
 }
 
+float colonne_a_float(Colonne col, Jour ans[ANS][12][13], int an,
+int mois, int jour)
+{
+  switch (col)
+    {
+    case MOY_JOUR: return moy_jour(ans, an, mois, jour);
+    case MOY_MOIS: return moy_mois(ans, an, mois);
+    case MOY_AN: return moy_an(ans, an);
+    }
+}
+
 int test_jour(Jour ans[ANS][12][31], int an, int mois, int jour,
-ListeConditions* conditions)
+ListeConditions* conditions, int *ok)
 {
   ListeConditions *courant ;
 
@@ -145,12 +152,36 @@ ListeConditions* conditions)
       // tester la condition courante
       Condition cond = courant->val;
 
-//      switch (cond.f)
-//        {
-
-//        }
+      switch (cond.col)
+        {
+        case MOY_AN:
+        case MOY_JOUR:
+        case MOY_MOIS: // float
+          {
+            float valeur = colonne_a_float(cond.col, ans, an, mois, jour);
+            switch (cond.f)
+              {
+              case EGALE: return valeur == atof(cond.params->val);
+              case INF: return valeur < atof(cond.params->val);
+              case SUP: return valeur > atof(cond.params->val);
+              default: *ok = 0;
+              }
+            break;
+          }
+        default: // int
+          {
+            int valeur = colonne_a_int(cond.col, ans, an, mois, jour);
+            switch (cond.f)
+              {
+              case EGALE: return valeur == atof(cond.params->val);
+              case INF: return valeur < atof(cond.params->val);
+              case SUP: return valeur < atof(cond.params->val);
+              //case JOUR_EST: return
+              default: *ok = 0;
+              }
+          }
+        }
     }
-
 }
 
 void parcourir(Jour ans[ANS][12][31], ListeConditions *conditions,
@@ -159,10 +190,10 @@ ListeChaines *cols, int *ok)
   int an, mois, jour;
   ListeChaines *courant = cols;
 
-  for(an = AN_DEBUT; an <= AN_FIN; an++) // an
+  for(an = ANDB; an <= ANFN; an++) // an
     for(mois = 1; mois <= 12; ++mois) // mois
       for(jour = 1; jour < longueur_mois(an, mois); ++jour) // jour
-        if(test_jour(ans, an, mois, jour, conditions)) // tester
+        if(test_jour(ans, an, mois, jour, conditions, ok)) // tester
           while(courant)
             {
               // Afficher les colonnes séléctionnée par l'utilisateur
