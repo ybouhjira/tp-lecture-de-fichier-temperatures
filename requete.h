@@ -1,3 +1,8 @@
+/**
+  * fichier :requete.h
+  * Contient les fonctions relatives à l'interrogation des données
+  */
+
 #ifndef REQUETE_H
 #define REQUETE_H
 
@@ -9,12 +14,28 @@
 #include "structs.h"
 
 
+/** Entrées :
+  *    ans : Les données
+  *    an : L'an
+  *    mois : Le mois
+  *    jour : Le jour
+  * Sorties :
+  *   La température moyenne de la date donnée.
+  */
 float moy_jour(Jour ans[ANS][12][31], int an, int mois, int jour)
 {
   Jour j = ans[an - ANDB][mois - 1][jour - 1];
   return ((float) (j.min + j.max)) / 2;
 }
 
+
+/** Entrées :
+  *    ans : Les données
+  *    an : L'an
+  *    mois : Le mois
+  * Sorties :
+  *   La température moyenne du mois.
+  */
 float moy_mois(Jour ans[ANS][12][31], int an, int mois)
 {
   float moy = 0;
@@ -23,6 +44,13 @@ float moy_mois(Jour ans[ANS][12][31], int an, int mois)
   return moy / longueur;
 }
 
+/** Entrées :
+  *    ans : Les données
+  *    an : L'an
+  *    mois : Le mois
+  * Sorties :
+  *   La température maximum du mois.
+  */
 int max_mois(Jour ans[ANS][12][31], int an, int mois)
 {
   int max = ans[an - ANDB][mois - 1][0].max, j;
@@ -34,6 +62,14 @@ int max_mois(Jour ans[ANS][12][31], int an, int mois)
   return max;
 }
 
+
+/** Entrées :
+  *    ans : Les données
+  *    an : L'an
+  *    mois : Le mois
+  * Sorties :
+  *   La température minimum du mois
+  */
 int min_mois(Jour ans[ANS][12][31], int an, int mois)
 {
   int min = ans[an - ANDB][mois - 1][0].min, j;
@@ -45,6 +81,14 @@ int min_mois(Jour ans[ANS][12][31], int an, int mois)
   return min;
 }
 
+/** Entrées :
+  *    ans : Les données
+  *    an : L'an
+  *    mois : Le mois
+  *    jour : Le jour
+  * Sorties :
+  *   La température moyenne de la date donnée
+  */
 float moy_an(Jour ans[ANS][12][31], int an)
 {
   float moy = 0;
@@ -53,6 +97,13 @@ float moy_an(Jour ans[ANS][12][31], int an)
   return moy / 12;
 }
 
+
+/** Entrées :
+  *    ans : Les données
+  *    an : L'an
+  * Sorties :
+  *   La température minimum l'année
+  */
 int min_an(Jour ans[ANS][12][31], int an)
 {
   int min = min_mois(ans, an, 1), m;
@@ -64,6 +115,15 @@ int min_an(Jour ans[ANS][12][31], int an)
   return min;
 }
 
+
+/** Entrées :
+  *    ans : Les données
+  *    an : L'an
+  *    mois : Le mois
+  *    jour : Le jour
+  * Sorties :
+  *   La température maximum de la date donnée
+  */
 int max_an(Jour ans[ANS][12][31], int an)
 {
   int max = max_mois(ans, an, 1), m;
@@ -74,6 +134,18 @@ int max_an(Jour ans[ANS][12][31], int an)
     }
   return max;
 }
+
+/** Entrées :
+ *    col : Une variable de type Colonne contenant la donnée sur laquelle
+ *          sera appliquée la condition
+ *    ans : Les données
+ *    an : L'année
+ *    mois : Le mois
+ *    jour : Le jour
+ * Sorties :
+ *   le numéro du jour ou une température min ou max d'un
+ * jour, d'un mois ou d'une année
+ */
 
 int colonne_a_int(Colonne col, Jour ans[ANS][12][31], int an,
 int mois, int jour)
@@ -96,6 +168,17 @@ int mois, int jour)
     }
 }
 
+/** Entrées :
+ *    col : Une variable de type Colonne contenant la donnée sur laquelle
+ *          sera appliquée la condition
+ *    ans : Les données
+ *    an : L'année
+ *    mois : Le mois
+ *    jour : Le jour
+ * Sorties :
+ *   la température moyenne d'un jour, d'un mois ou d'une année
+ */
+
 float colonne_a_float(Colonne col, Jour ans[ANS][12][31], int an,
 int mois, int jour)
 {
@@ -109,6 +192,16 @@ int mois, int jour)
       return 0;
     }
 }
+
+/** Entrées :
+ *    cond : Une variable de type Condition
+ *    ans : Les données
+ *    an : L'année
+ *    mois : Le mois
+ *    jour : Le jour
+ * Sorties :
+ *   return 1 si la condition proposée est vérifiée, 0 sinon
+ */
 
 int tester_condition(Condition cond, Jour ans[ANS][12][31], int an,
 int mois, int jour, int *ok)
@@ -151,8 +244,18 @@ int mois, int jour, int *ok)
     }
 }
 
+/** Entrées :
+ *    ans : Les données
+ *    an : L'année
+ *    mois : Le mois
+ *    jour : Le jour
+ *    conditions : Une variable de type ListeConditions
+ * Sorties :
+ *   return 1 si l'un des groupes de conditions est vérifié, 0 si non
+ */
+
 int test_jour(Jour ans[ANS][12][31], int an, int mois, int jour,
-ListeConditions* conditions, int *ok)
+ListeConditions *conditions, int *ok)
 {
   ListeConditions *lst ; // itérateur pour la liste
   int res = 1; // resultat
@@ -161,7 +264,9 @@ ListeConditions* conditions, int *ok)
     {
       switch (lst->val.col) {
         case OU:
+          //si les conditions précédentes sont vérifiées, on arrete
           if(res) return 1;
+          //si non on passe aux conditions suivantes
           else res = 1;
           break;
         default:
@@ -171,6 +276,16 @@ ListeConditions* conditions, int *ok)
     }
   return res;
 }
+
+/** Entrées :
+ *    ans : Les données
+ *    cols : Une variable de type ListeChaines
+ *    conditions : Une variable de type ListeConditions
+ *    ok : Une variable de type entier (pour vérifier les erreurs)
+ * Déscription :
+ *    renvoyer sur l'ecran l'ensemble des données vérifiant les conditions
+ * précisées
+ */
 
 void parcourir(Jour ans[ANS][12][31], ListeConditions *conditions,
 ListeChaines *cols, int *ok)
@@ -236,6 +351,14 @@ ListeChaines *cols, int *ok)
     }
 }
 
+/** Entrées :
+ *    liste : Une variable de type ListeChaines
+ *    str : Une variable de type chaine de caractéres
+ * Déscription :
+ *    ajouter une donnée de type chaine de caractéres a la fin d'une liste
+ * chainée
+ */
+
 void liste_chaines_ajout_fin(ListeChaines **liste, char *str)
 {
   ListeChaines *nouv = calloc(1, sizeof(ListeChaines));
@@ -248,6 +371,14 @@ void liste_chaines_ajout_fin(ListeChaines **liste, char *str)
       courant->suiv = nouv;
     }
 }
+
+/** Entrées :
+ *    liste : Une variable de type ListeChaines
+ *    str : Une variable de type chaine de caractéres
+ * Déscription :
+ *    ajouter une donnée de type Condition a la fin d'une liste
+ * chainée de type ListeConditions
+ */
 
 void liste_conditions_ajout_fin(ListeConditions **liste, Condition cond)
 {
@@ -262,7 +393,14 @@ void liste_conditions_ajout_fin(ListeConditions **liste, Condition cond)
     }
 }
 
-ListeChaines* lire_colonnes()
+/** Sorties :
+ *    liste : Une variable de type ListeChaines
+ * Déscription :
+ *    ajouter une donnée de type Condition a la fin d'une liste
+ * chainée de type ListeConditions
+ */
+
+ListeChaines *lire_colonnes()
 {
   while(getchar() != '\n');
 
@@ -276,16 +414,29 @@ ListeChaines* lire_colonnes()
   while(c != '\n')
     {
       c = getchar();
+      /*si le caractére lu n'est ni espace ni la fin de la chaine, le mettre
+        dans la liste*/
       if(c != ' ' && c != '\n') colonne[i++] = c;
-      else
+      else//sinon
         {
-          colonne[i] = '\0';
+          colonne[i] = '\0';//marquer la fin de la chaine
           i = 0;
+          //l'ajouter a la fin de la liste
           liste_chaines_ajout_fin(&listeColonnes, colonne);
         }
     }
   return listeColonnes;
 }
+
+/** 
+ * Entrées :
+ *    chaine : Une chaine de caractéres de type chaine de longueur 100
+ *    ok : Une variable de type entier
+ * Sorties :
+ *    Colonne : Une variable de type Colonne
+ * Déscription :
+ *    renvoie le contenu d'une chaine de caractéres
+ */
 
 Colonne chaine_a_colonne(char chaine[100], int *ok)
 {
@@ -310,6 +461,16 @@ Colonne chaine_a_colonne(char chaine[100], int *ok)
   return 0;
 }
 
+/**
+ * Entrées :
+ *    chaine : Une chaine de caractéres de type chaine de longueur 4
+ *    ok : Une variable de type entier
+ * Sorties :
+ *    Fonction : Une variable de type Fonction
+ * Déscription :
+ *    renvoie le contenu d'une chaine de caractéres
+ */
+
 Fonction chaine_a_fonction(char chaine[4], int *ok)
 {
   if(!strcmp(chaine, "est")) return JOUR_EST;
@@ -322,17 +483,26 @@ Fonction chaine_a_fonction(char chaine[4], int *ok)
   return 0;
 }
 
+/**
+ * Entrées :
+ *    chaine : Une chaine de caractéres de type chaine de longueur 9
+ *    cond : Une variable de type Condition
+ * Déscription :
+ *    remplie la variable cond avec le contenu de chaine, selon le type
+ * du parametre
+ */
+
 void chaine_a_param(char chaine[9], Condition *cond)
 {
   switch (cond->col)
     {
     // jour -> STR pour est , et INT pour EGALE
-    case JOUR:
+    case JOUR://dans le cas de JOUR
       switch (cond->f)
         {
-        case JOUR_EST:
-          strcpy(cond->param.val.jour, chaine);
-          cond->param.type = STR;
+        case JOUR_EST://si la fonction est JOUR_EST
+          strcpy(cond->param.val.jour, chaine);//affecter le jour
+          cond->param.type = STR;//affecter le type de condition
           break;
         default :
           cond->param.type = INT;
@@ -355,7 +525,17 @@ void chaine_a_param(char chaine[9], Condition *cond)
     }
 }
 
-ListeConditions* lire_conditions(int *ok)
+/**
+ * Entrées :
+ *    ok : Une variable de entier (pour vérifier les erreurs)
+ * Sorties :
+ *    Une variable de type ListeConditions
+ * Déscription :
+ *    retourne une variable de type ListeConditions, contenant des données
+ * (conditions) imposées par l'utilisateur
+ */
+
+ListeConditions *lire_conditions(int *ok)
 {
   printf("CONDITIONS : \n    ");
   char mot[10];
@@ -420,7 +600,13 @@ ListeConditions* lire_conditions(int *ok)
   return conditions;
 }
 
-
+/**
+ * Entrées :
+ *    ans : Les données
+ * Déscription :
+ *    Définir les colonnes et les conditions et faire le parcour des
+ * données, en se basant sur ces conditions
+ */
 
 void interrogation(Jour ans[ANS][12][31])
 {

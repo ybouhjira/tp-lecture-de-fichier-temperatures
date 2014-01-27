@@ -47,7 +47,7 @@ typedef struct
 typedef struct
 {
   Colonne col; // Colonne sur laquelle appliquer la condition
-  Fonction f; // la fonction applique
+  Fonction f; // la fonction appliquée
   Param param; // les paramètres de la fonction
 } Condition;
 
