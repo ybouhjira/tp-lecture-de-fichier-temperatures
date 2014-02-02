@@ -1,7 +1,7 @@
 TP : Lecture d'un fichier de températures
 =========================================
 
-Lire le fichier généré par tp_generation_de_fichier et offrir la
+Lire le fichier généré par [tp_generation_de_fichier](https://github.com/ybouhjira/tp_generation_de_fichiers) et offrir la
 possibilité d'effectuer des interrogations dessus.
 
 Exemple d'execution du programme
