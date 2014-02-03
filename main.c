@@ -23,7 +23,12 @@ int main(void)
   Jour ans[ANS][12][31];
   lecture(nomFichier, ans);
 
-  interrogation(ans);
+  int jour = 0;
+  int froid = min_mois(ans, 1901, 1, &jour);
+
+  printf("Le jour le plus froid dans le mois 1 de 1901 est %d, "
+         "temperarture de %d\n", jour, froid);
+
 
   return 0;
 }
